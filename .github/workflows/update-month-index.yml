@@ -69,6 +69,38 @@ jobs:
             tmp=$(mktemp)
             awk -v link="$LINK" 'NR==1{print; next} NR==2{print; print link; next} {print}' "$INDEX" > "$tmp"
             mv "$tmp" "$INDEX"
+            # ---- update daily/README.md (master month index) ----
+MASTER_INDEX="${ROOT}/README.md"
+
+# ensure master index exists
+if [ ! -f "$MASTER_INDEX" ]; then
+  echo "# Daily Logs" > "$MASTER_INDEX"
+  echo "" >> "$MASTER_INDEX"
+fi
+
+MONTH_HEADER="## ${YEAR}-${MONTH}"
+MONTH_LINK="- [${YEAR}-${MONTH}](${YEAR}/${MONTH}/README.md)"
+
+# 如果没有这个月份标题：插到文件最上面（标题下面）
+if ! grep -Fqx "$MONTH_HEADER" "$MASTER_INDEX"; then
+  tmp2=$(mktemp)
+  awk -v h="$MONTH_HEADER" -v l="$MONTH_LINK" '
+    NR==1 {print; print ""; print h; print l; print ""; next}
+    {print}
+  ' "$MASTER_INDEX" > "$tmp2"
+  mv "$tmp2" "$MASTER_INDEX"
+else
+  # 有标题但没有链接：把链接插到标题下一行
+  if ! grep -Fq "${YEAR}/${MONTH}/README.md" "$MASTER_INDEX"; then
+    tmp2=$(mktemp)
+    awk -v h="$MONTH_HEADER" -v l="$MONTH_LINK" '
+      $0==h {print; print l; next}
+      {print}
+    ' "$MASTER_INDEX" > "$tmp2"
+    mv "$tmp2" "$MASTER_INDEX"
+  fi
+fi
+# ---- end ----
           done
 
       - name: Commit changes (if any)
