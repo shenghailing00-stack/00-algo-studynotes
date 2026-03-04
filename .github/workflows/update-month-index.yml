@@ -1,4 +1,4 @@
-name: Update Monthly Daily Index
+name: Update Monthly Daily Index (Newest First)
 
 on:
   push:
@@ -16,17 +16,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Update month index for daily logs
+      - name: Update month index (newest first)
         shell: bash
         run: |
           set -e
-
           ROOT="daily"
 
-          # 找出本次 push 中新增/修改的日记文件（排除 README.md）
-          CHANGED=$(git diff --name-only HEAD~1 HEAD || true)
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
 
-          # 过滤出形如：daily/YYYY/MM/YYYY-MM-DD.md
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            RANGE="HEAD~1..HEAD"
+          else
+            RANGE="$BEFORE..$AFTER"
+          fi
+
+          CHANGED=$(git diff --name-only $RANGE || true)
           DAILY_FILES=$(echo "$CHANGED" | grep -E "^${ROOT}/[0-9]{4}/[0-9]{2}/[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$" || true)
 
           if [ -z "$DAILY_FILES" ]; then
@@ -38,23 +43,32 @@ jobs:
             YEAR=$(echo "$f" | awk -F'/' '{print $2}')
             MONTH=$(echo "$f" | awk -F'/' '{print $3}')
             DAYFILE=$(basename "$f")
-
             INDEX="${ROOT}/${YEAR}/${MONTH}/README.md"
 
-            # 如果当月索引不存在就创建
             if [ ! -f "$INDEX" ]; then
               mkdir -p "${ROOT}/${YEAR}/${MONTH}"
               echo "# ${YEAR}-${MONTH} Daily Logs" > "$INDEX"
               echo "" >> "$INDEX"
             fi
 
-            # 若不存在该日记链接则追加
-            if ! grep -q "(${DAYFILE})" "$INDEX"; then
-              echo "- [${DAYFILE%.md}](${DAYFILE})" >> "$INDEX"
-              echo "Updated index: $INDEX + $DAYFILE"
-            else
-              echo "Index already contains: $DAYFILE"
+            LINK="- [${DAYFILE%.md}](${DAYFILE})"
+
+            if grep -q "(${DAYFILE})" "$INDEX"; then
+              continue
             fi
+
+            # 确保第二行是空行
+            LINE2=$(sed -n '2p' "$INDEX" || true)
+            if [ -n "$LINE2" ]; then
+              tmp=$(mktemp)
+              awk 'NR==1{print; print ""; next} {print}' "$INDEX" > "$tmp"
+              mv "$tmp" "$INDEX"
+            fi
+
+            # 插入到第 3 行（标题+空行之后）
+            tmp=$(mktemp)
+            awk -v link="$LINK" 'NR==1{print; next} NR==2{print; print link; next} {print}' "$INDEX" > "$tmp"
+            mv "$tmp" "$INDEX"
           done
 
       - name: Commit changes (if any)
