@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Update month index (newest first)
+      - name: Update month index + master index (newest first)
         shell: bash
         run: |
           set -e
@@ -43,6 +43,8 @@ jobs:
             YEAR=$(echo "$f" | awk -F'/' '{print $2}')
             MONTH=$(echo "$f" | awk -F'/' '{print $3}')
             DAYFILE=$(basename "$f")
+
+            # ---- 1) update monthly index: daily/YYYY/MM/README.md ----
             INDEX="${ROOT}/${YEAR}/${MONTH}/README.md"
 
             if [ ! -f "$INDEX" ]; then
@@ -53,54 +55,51 @@ jobs:
 
             LINK="- [${DAYFILE%.md}](${DAYFILE})"
 
-            if grep -q "(${DAYFILE})" "$INDEX"; then
-              continue
-            fi
+            if ! grep -Fq "(${DAYFILE})" "$INDEX"; then
+              # ensure blank line after title
+              LINE2=$(sed -n '2p' "$INDEX" || true)
+              if [ -n "$LINE2" ]; then
+                tmp=$(mktemp)
+                awk 'NR==1{print; print ""; next} {print}' "$INDEX" > "$tmp"
+                mv "$tmp" "$INDEX"
+              fi
 
-            # ensure blank line after title
-            LINE2=$(sed -n '2p' "$INDEX" || true)
-            if [ -n "$LINE2" ]; then
+              # insert at line 3 (newest first)
               tmp=$(mktemp)
-              awk 'NR==1{print; print ""; next} {print}' "$INDEX" > "$tmp"
+              awk -v link="$LINK" 'NR==1{print; next} NR==2{print; print link; next} {print}' "$INDEX" > "$tmp"
               mv "$tmp" "$INDEX"
             fi
 
-            # insert at line 3 (newest first)
-            tmp=$(mktemp)
-            awk -v link="$LINK" 'NR==1{print; next} NR==2{print; print link; next} {print}' "$INDEX" > "$tmp"
-            mv "$tmp" "$INDEX"
-            # ---- update daily/README.md (master month index) ----
-MASTER_INDEX="${ROOT}/README.md"
+            # ---- 2) update master index: daily/README.md ----
+            MASTER_INDEX="${ROOT}/README.md"
 
-# ensure master index exists
-if [ ! -f "$MASTER_INDEX" ]; then
-  echo "# Daily Logs" > "$MASTER_INDEX"
-  echo "" >> "$MASTER_INDEX"
-fi
+            if [ ! -f "$MASTER_INDEX" ]; then
+              echo "# Daily Logs" > "$MASTER_INDEX"
+              echo "" >> "$MASTER_INDEX"
+            fi
 
-MONTH_HEADER="## ${YEAR}-${MONTH}"
-MONTH_LINK="- [${YEAR}-${MONTH}](${YEAR}/${MONTH}/README.md)"
+            MONTH_HEADER="## ${YEAR}-${MONTH}"
+            MONTH_LINK="- [${YEAR}-${MONTH}](${YEAR}/${MONTH}/README.md)"
 
-# 如果没有这个月份标题：插到文件最上面（标题下面）
-if ! grep -Fqx "$MONTH_HEADER" "$MASTER_INDEX"; then
-  tmp2=$(mktemp)
-  awk -v h="$MONTH_HEADER" -v l="$MONTH_LINK" '
-    NR==1 {print; print ""; print h; print l; print ""; next}
-    {print}
-  ' "$MASTER_INDEX" > "$tmp2"
-  mv "$tmp2" "$MASTER_INDEX"
-else
-  # 有标题但没有链接：把链接插到标题下一行
-  if ! grep -Fq "${YEAR}/${MONTH}/README.md" "$MASTER_INDEX"; then
-    tmp2=$(mktemp)
-    awk -v h="$MONTH_HEADER" -v l="$MONTH_LINK" '
-      $0==h {print; print l; next}
-      {print}
-    ' "$MASTER_INDEX" > "$tmp2"
-    mv "$tmp2" "$MASTER_INDEX"
-  fi
-fi
-# ---- end ----
+            # if month header not exists, prepend section under title
+            if ! grep -Fqx "$MONTH_HEADER" "$MASTER_INDEX"; then
+              tmp2=$(mktemp)
+              awk -v h="$MONTH_HEADER" -v l="$MONTH_LINK" '
+                NR==1 {print; print ""; print h; print l; print ""; next}
+                {print}
+              ' "$MASTER_INDEX" > "$tmp2"
+              mv "$tmp2" "$MASTER_INDEX"
+            else
+              # header exists but link missing -> insert link right after header
+              if ! grep -Fq "${YEAR}/${MONTH}/README.md" "$MASTER_INDEX"; then
+                tmp2=$(mktemp)
+                awk -v h="$MONTH_HEADER" -v l="$MONTH_LINK" '
+                  $0==h {print; print l; next}
+                  {print}
+                ' "$MASTER_INDEX" > "$tmp2"
+                mv "$tmp2" "$MASTER_INDEX"
+              fi
+            fi
           done
 
       - name: Commit changes (if any)
@@ -111,7 +110,7 @@ fi
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git add .
-            git commit -m "chore: auto-update monthly daily index"
+            git commit -m "chore: auto-update daily indexes"
             git push
           else
             echo "No changes to commit."
