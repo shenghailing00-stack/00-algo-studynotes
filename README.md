@@ -5,11 +5,11 @@
 ## Daily Logs
 - [按月份归档](daily/README.md)
 
-## 怎么写
+## content
 每天新建：`daily/YYYY/MM/YYYY-MM-DD.md`  
-知识点/代码/关键点/收获
+主要是重点的刷题总结，知识点/代码/关键点/收获
 
-## 结构
+## structure
 - `daily/`：每日日志（按年月归档）
 - `daily/template/`：模板
 - [模板](daily/template/daily-template.md)
