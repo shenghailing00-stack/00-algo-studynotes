@@ -57,7 +57,7 @@ jobs:
               continue
             fi
 
-            # 确保第二行是空行
+            # ensure blank line after title
             LINE2=$(sed -n '2p' "$INDEX" || true)
             if [ -n "$LINE2" ]; then
               tmp=$(mktemp)
@@ -65,7 +65,7 @@ jobs:
               mv "$tmp" "$INDEX"
             fi
 
-            # 插入到第 3 行（标题+空行之后）
+            # insert at line 3 (newest first)
             tmp=$(mktemp)
             awk -v link="$LINK" 'NR==1{print; next} NR==2{print; print link; next} {print}' "$INDEX" > "$tmp"
             mv "$tmp" "$INDEX"
