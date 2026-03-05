@@ -1,3 +1,3 @@
 # Programming Languages Notes
 
-- [Python](python/README.md)
+- [Python](./python.md)
