@@ -1,6 +1,6 @@
 # Python Notes
 
-- 有点乱乱的记录
+- 有点乱乱的记录（见obsidian)
   # A+B问题
   - I
   - II：列表、for循环、while循环、数据类型转换、`sys`模块
