@@ -13,3 +13,9 @@
 - `daily/`：每日日志（按年月归档）
 - `daily/template/`：模板
 - [模板](daily/template/daily-template.md)
+
+## Projects
+- [小项目合集](projects/README.md)
+
+## Language Notes
+- [编程语言笔记](lang/README.md)
