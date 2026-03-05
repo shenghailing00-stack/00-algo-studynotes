@@ -1,3 +1,3 @@
 # Mini Projects
 
-- [Snake](snake/README.md)
+- [Little Snake Baby Game](little-snake-baby-game/README.md)
