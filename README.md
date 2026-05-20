@@ -29,6 +29,7 @@
 ## Projects
 
 - [Python 终端贪吃蛇](projects/python-terminal-snake/)
+- [Python 迷宫寻路可视化器](projects/pathfinding-visualizer-python/)
 
 ## Templates
 
