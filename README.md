@@ -30,6 +30,7 @@
 
 - [Python 终端贪吃蛇](projects/python-terminal-snake/)
 - [Python 迷宫寻路可视化器](projects/pathfinding-visualizer-python/)
+- [C++ LRU Cache 缓存模拟器](projects/lru-cache-cpp/)：使用 C++17 实现的 LRU 缓存模拟器，练习 unordered_map、list 和缓存淘汰算法。
 
 ## Templates
 
