@@ -1,0 +1,28 @@
+﻿# 完全背包：组合数与排列数
+- 完全背包
+  - **每个物品可选无限次**
+  - 完全背包之所以要**正序遍历容量**，是因为这样在更新 dp[j] 时，dp[j - weight[i]] 可能已经是当前物品更新后的结果，也就是说它已经包含了当前物品。
+  - 此时再加上一次当前物品，就等于在同一轮中继续使用该物品，从而**实现“同一件物品可以被重复选择”**。
+  - 正序遍历本质上就是让当前物品可以不断在自己的基础上叠加。
+    
+  - 思路：定义 dp[j] 表示容量为 j 的背包所能获得的最大价值。
+  - 对于每种材料，由于它可以被重复选择，因此在更新 dp 数组时，容量必须从小到大正序遍历。
+  - 状态转移方程为 dp[j] = max(dp[j], dp[j - w] + v)，表示当前容量 j 下，比较“不选当前材料”和“选一个当前材料”两种情况，取更大值。
+  - 最终 dp[V] 就是容量为 V 时的最大总价值
+    <img width="1279" height="1768" alt="bf2e6027259f7149948c4e1c3dee5cce" src="https://github.com/user-attachments/assets/d7ce78ef-bf26-4d53-8386-211dc595a3e8" />
+- [518.零钱兑换II](https://leetcode.cn/problems/coin-change-ii/description/)**求组合**
+  - 一维：把每种硬币看作物品，把金额看作背包容量。
+  - 由于每种硬币可以使用无限次，因此是完全背包。
+  - 题目要求的是不同组合的个数，所以要用“先遍历物品，再遍历背包”的顺序，避免把顺序不同的情况重复统计。
+  - 定义 dp[j] 为凑出金额 j 的方法数，则对于每个硬币 coins[i]，有转移 dp[j] += dp[j - coins[i]]。
+  - 初始化 dp[0] = 1，最终返回 dp[amount]
+    <img width="1280" height="1715" alt="c23c5b63c829ffa5760dc94334b72a60" src="https://github.com/user-attachments/assets/a85fd328-4811-4ff6-94fb-d9bc3b6ca222" />
+    <img width="2332" height="2978" alt="ab1cd696b16aaa09c19a79d55f5566d2" src="https://github.com/user-attachments/assets/b9eeb97f-a062-4a02-8764-d80b23fe19c5" />
+
+
+- [377.组合总和IV](https://leetcode.cn/problems/combination-sum-iv/description/)**求排列**
+  - 求的是排列数，顺序不同算不同方案，所以要先遍历背包，再遍历物品。
+  - 定义 dp[i] 为凑成和 i 的排列数，对于每个 i，枚举每个 nums[j] 作为最后一个元素，若 i - nums[j] >= 0，则有 dp[i] += dp[i - nums[j]]。
+<img width="1988" height="2726" alt="651f5653305fbc0009cfd669bb9542cb" src="https://github.com/user-attachments/assets/d0b89ba9-add3-4414-bdb4-eed0741a5464" />
+- [爬楼梯](https://kamacoder.com/problempage.php?pid=1067)
+  <img width="1280" height="1803" alt="05fb3fb7368fcdc2a6a9a43d5266a6e0" src="https://github.com/user-attachments/assets/43bc6f40-a52c-4f3f-9483-efb982fd6fb4" />

@@ -1,0 +1,162 @@
+﻿# 数组基础：二分查找与双指针
+
+今天搭了一个 公开可访问的学习日记仓库，并用 GitHub Actions 自动维护归档索引
+ - 日常使用流程：
+  - 进 daily/YYYY/MM/（比如 daily/2026/03/）
+  - Add file → Create new file
+  - 文件名：YYYY-MM-DD.md
+  - 写完提交
+  - 索引会自动把新日记加到当月 README.md 最上面
+
+03-04 数组part01
+- 704 二分查找https://leetcode.cn/problems/binary-search/description/
+在一个**已经排好序**的数组里找一个目标数字
+  - 代码：
+    ```python
+    class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        # 1. 准备左右两个书签
+        left = 0
+        right = len(nums) - 1 # 左闭右闭区间；若（len（nums）则为左闭右开）
+        
+        # 2. 只要查找区间依然有效，就继续循环
+        while left <= right:
+            # 3. 找到中间位置
+            mid = (left + right) // 2
+            
+            # 4. 开始比对
+            if nums[mid] == target:
+                return mid         # 找到了，直接交出位置
+                
+            elif nums[mid] < target:
+                left = mid + 1     # 猜小了，说明在右边，把左边界向右推
+                
+            else:
+                right = mid - 1    # 猜大了，说明在左边，把右边界向左推
+                
+        # 5. 如果把区间缩减到0都没找到，说明真的不存在
+        return -1
+    ```
+    **循环不变量规则**
+     - 二分法区间的定义一般为两种
+      - 左闭右闭即[left, right]
+       - while (left <= right) 要使用 <= ，因为left == right是有意义的
+       - if (nums[middle] > target) right 要赋值为 middle - 1，因为当前这个nums[middle]一定不是target，那么接下来要查找的左区间结束下标位置就是 middle - 1
+      - 左闭右开即[left, right)
+       - while (left < right)
+       - if (nums[middle] > target) right 更新为 middle，因为当前nums[middle]不等于target，去左区间继续寻找，而寻找区间是左闭右开区间，所以right更新为middle，即：下一个查询区间不会去比较nums[middle]
+ - 35.搜索插入位置https://leetcode.cn/problems/search-insert-position/description/（放入左闭右开区间的情况）
+   ```python
+   class Solution:
+    def searchInsert(self, nums: List[int], target: int) -> int:
+        left = 0
+        # 变化 1：右边界是“空气墙”，不减 1
+        right = len(nums) 
+        
+        # 变化 2：只要左书签还没撞上空气墙，就继续找
+        while left < right:
+            mid = (left + right) // 2
+            
+            if nums[mid] == target:
+                return mid         # 找到了，直接交出页码
+                
+            elif nums[mid] < target:
+                # 猜小了：左边界是实打实的，既然 mid 不是，就从 mid + 1 开始
+                left = mid + 1     
+                
+            else:
+                # 变化 3：猜大了：右边界是空气墙，直接把墙设在 mid 处
+                right = mid        
+                
+        # 循环结束时，left 和 right 一定是重合的，它们指的位置就是新数字该插入的地方
+        return left
+   ```
+- **双指针**：27移除元素https://leetcode.cn/problems/remove-element/description/
+ - 暴力解法：
+   ```python
+   class Solution:
+    def removeElement(self, nums: List[int], val: int) -> int:
+        size = len(nums)
+        i = 0
+        
+        # 外层循环：遍历整个数组
+        while i < size:
+            if nums[i] == val: # 抓到一个需要移除的目标
+                
+                # 内层循环：把目标后面的元素，统统向左移动一位来覆盖它
+                for j in range(i + 1, size):
+                    nums[j - 1] = nums[j]
+                    
+                # 因为覆盖后数组的有效长度少了一个，所以 size 减 1
+                size -= 1
+                
+                # 【关键一步】：因为后面的元素顶上来了，现在 i 这个位置变成了新元素
+                # 我们下次还得继续检查这个位置，所以 i 要退后一步，抵消掉下面的 i += 1
+                i -= 1 
+                
+            i += 1 # 检查下一个位置
+            
+        return size
+   ```
+- 双指针法：
+   - 通过一个快指针和慢指针在一个循环完成下两个循环的工作
+   - 快指针：寻找新的存储元素，新的存储就是不含有目标元素的存储
+   - 慢标指针：指向更新新内存下的位置 
+   ```python
+   class Solution:
+    def removeElement(self, nums: List[int], val: int) -> int:
+        slow = 0 # 慢指针：安排座位的编号，一开始从 0 号位开始
+        
+        # 快指针：质检员，挨个检查所有元素
+        for fast in range(len(nums)):
+            
+            # 如果快指针发现了一个“好数字”（不等于我们要踢走的 val）
+            if nums[fast] != val:
+                # 慢指针就把这个好数字收下，放到自己的座位上
+                nums[slow] = nums[fast]
+                
+                # 慢指针把座位号加 1，准备迎接下一个好数字
+                slow += 1
+                
+        # 慢指针走过的距离，刚好就是存活下来的好数字的个数！
+        return slow
+   ```
+   - 977.有序数组的平方https://leetcode.cn/problems/squares-of-a-sorted-array/
+    - 数组平方的最大值就在数组的两端，不是最左边就是最右边，不可能是中间
+    - 两个指针是“相向而行”，从两头往中间挤
+      ```python
+      class Solution:
+      def sortedSquares(self, nums: List[int]) -> List[int]:
+        n = len(nums)
+        # 提前准备好一个跟原数组一样大的空盘子，里面先填满 0
+        result = [0] * n 
+        
+        left = 0           # 左指针：指着最小的负数（最左端）
+        right = n - 1      # 右指针：指着最大的正数（最右端）
+        
+        # k 指针：负责给新盘子安排位置。因为我们要从大到小找，所以从新盘子的最后一位开始填
+        k = n - 1          
+        
+        # 只要左右指针还没错开（即使重合了，那个数字也得处理，所以要带 =）
+        while left <= right:
+            # 算一下两头的平方值
+            left_square = nums[left] * nums[left]
+            right_square = nums[right] * nums[right]
+            
+            # 巅峰对决：谁大，谁就去新盘子的末尾排队
+            if left_square > right_square:
+                result[k] = left_square
+                left += 1  # 左边赢了，左指针往右走一步，换下一个来比
+            else:
+                result[k] = right_square
+                right -= 1 # 右边赢了，右指针往左走一步，换下一个来比
+                
+            # 新盘子的坑位往前挪一个
+            k -= 1
+            
+        return result
+  ```
+
+
+
+       

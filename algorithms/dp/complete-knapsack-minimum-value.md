@@ -1,0 +1,13 @@
+﻿# 完全背包最值型问题
+- [322.零钱兑换](https://leetcode.cn/problems/coin-change/description/)
+  - 设 dp[j] 表示凑成金额 j 所需的最少硬币数。
+  - 因为每种硬币可以无限使用，所以外层遍历硬币，内层对金额进行正序遍历。
+  - 状态转移为 dp[j] = min(dp[j], dp[j - coins[i]] + 1)，表示若金额 j - coins[i] 可以凑出，那么再加入一枚当前硬币，就能更新凑成 j 的最少硬币数。
+  - 初始化时令 dp[0] = 0，表示凑成金额 0 不需要硬币，其余位置初始化为无穷大，表示暂时无法凑出。
+  - 最后若 dp[amount] 仍为无穷大，则返回 -1，否则返回 dp[amount]
+  - <img width="1279" height="1723" alt="f413e09ad52aab40d79e4e12556d70a0" src="https://github.com/user-attachments/assets/ffe13edb-8b6c-4356-9fd3-63d190fd8e2d" />
+- [279.完全平方数](https://leetcode.cn/problems/perfect-squares/description/)
+  - 本题和 322. 零钱兑换 本质相同，都是完全背包中的最值问题。
+  - 设 dp[i] 表示凑成整数 i 所需的最少完全平方数个数。物品为所有不超过 n 的完全平方数 j*j，每种物品可以无限使用。
+  - 状态转移为 dp[i] = min(dp[i], dp[i - j*j] + 1)，表示若最后选择一个平方数 j*j，则前面需要先凑出 i - j*j。
+  - 初始化 dp[0] = 0，其余位置初始化为无穷大，最终返回 dp[n]。

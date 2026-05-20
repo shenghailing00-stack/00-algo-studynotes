@@ -1,0 +1,141 @@
+﻿# 哈希表与双指针：求和类问题
+- [454.四数相加](https://leetcode.cn/problems/4sum-ii/description/)——看完视频讲解后感觉思路清晰，不难。
+   - C++用map，python用字典dict()
+   - 把 4 个数组拆成 “2 + 2” 的两组
+   - 步骤：
+     - 处理前两组（建登记册）：
+       - 双重循环遍历 nums1 和 nums2
+       - 计算所有的两数之和 n1 + n2
+       - 把算出的“和”存入哈希表（字典）。和作 Key（键），和出现的次数作 Value（值）
+     - 处理后两组（按需寻人）
+       - 准备一个结果变量 count = 0
+       - 双重循环遍历 nums3 和 nums4
+       - 算出要凑成 0 所需的“另一半”目标值，即 key = -(n3 + n4)
+    - 查表累加（牵手成功）
+      - 去哈希表里查这个 key 在不在
+      - 如果在，就把哈希表里存的**“出现次数”**，直接累加到 count 里
+      - 循环结束，返回 count
+        ```python
+        hashmap=dict()
+        for n1 in nums1:
+            for n2 in nums2:
+                if n1+n2 in hashmap:
+                    hashmap[n1+n2]+=1
+                else:
+                    hashmap[n1+n2]=1
+        count=0
+        for n3 in nums3:
+            for n4 in nums4:
+                key=-n3-n4
+                if key in hashmap:
+                    count+=hashmap[key]
+        return count
+        ```
+- [383.赎金信](https://leetcode.cn/problems/ransom-note/description/)
+  - [242.有效字母的异位词](https://leetcode.cn/problems/valid-anagram/description/)拓展题：求字符串a能否组成字符串b，而不用管字符串b 能不能组成字符串a
+  - 采用空间换取时间的哈希策略，用一个长度为26的数组来记录magazine里字母出现的次数。再用ransomNote去验证这个数组是否包含了ransomNote所需要的所有字母
+  - ord():将字符翻译成ASCII或Unicode码 'a':97,'z':122
+  - python使用数组
+    ```python
+    ransom_count = [0] * 26
+        magazine_count = [0] * 26
+        for c in ransomNote:
+            ransom_count[ord(c) - ord('a')] += 1
+        for c in magazine:
+            magazine_count[ord(c) - ord('a')] += 1
+        return all(ransom_count[i] <= magazine_count[i] for i in range(26))
+    ```
+  - 使用**counter**：
+    - <img width="1186" height="626" alt="image" src="https://github.com/user-attachments/assets/5a4d7e88-fd2a-4c7c-98f3-950e46b73840" />
+    - <img width="1407" height="408" alt="image" src="https://github.com/user-attachments/assets/72b5af5e-9b21-4bbc-b191-948a22e47b1f" />
+    ```python
+    if len(ransomNote)>len(magazine):
+            return False
+        return not collections.Counter(ransomNote)-collections.Counter(magazine)
+    ```
+- [15.三数之和](https://leetcode.cn/problems/3sum/description/)
+  - a+b+c=0
+  - 用双指针（注意要对数组排序）
+    - i（a),left(b),right(c)
+    - **要分别对a，b、c去重**
+      - if nums[i]==nums[i-1] continue
+      - if right[i]==right[i-1] right--    left[i]==left[i-1] left++
+        ```python
+         result = []
+        nums.sort()
+        
+        for i in range(len(nums)):
+            # 如果第一个元素已经大于0，不需要进一步检查
+            if nums[i] > 0:
+                return result
+            
+            # 跳过相同的元素以避免重复
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+                
+            left = i + 1
+            right = len(nums) - 1
+            
+            while right > left:
+                sum_ = nums[i] + nums[left] + nums[right]
+                
+                if sum_ < 0:
+                    left += 1
+                elif sum_ > 0:
+                    right -= 1
+                else:
+                    result.append([nums[i], nums[left], nums[right]])
+                    
+                    # 跳过相同的元素以避免重复
+                    while right > left and nums[right] == nums[right - 1]:
+                        right -= 1
+                    while right > left and nums[left] == nums[left + 1]:
+                        left += 1
+                        
+                    right -= 1
+                    left += 1
+                    
+        return result
+        ```
+- [18.四数之和](https://leetcode.cn/problems/4sum/description/)
+  - 大体思路与三数之和一致，也是用双指针，多加一个for（k      ）的循环
+  - a+b+c+d=target
+  - k(a),i(b),left(c),right(d)
+  - nums[k]+nums[i]+nums[left]+nums[right]=target
+  - 重点在剪枝和去重
+    - 一级剪枝：if (nums[k]>target && nums[k]>0 && target>0) break
+    - 一级去重：if(k>0 && nums[k]==nums[k-1]) continue
+    - 二级剪枝：nums[k]+nums[i]>target && nums[k]+nums[i]>0 && target>0   break
+    - 二级去重：if(i>k+1 && nums[i]==nums[i-1]) continue
+      ```python
+       nums.sort()
+        n = len(nums)
+        result = []
+        for i in range(n):
+            if nums[i] +nums[i+1]+nums[i+2]=nums[i+3]>target: # 剪枝(最小的四个都比target大，后面就不用看了）
+                break
+            if i > 0 and nums[i] == nums[i-1]:# 去重
+                continue
+            for j in range(i+1, n):
+                if nums[i] + nums[j] +nums[j+1]+nums[j+2]>target: #剪枝(最小的四个都比target大）
+                    break
+                if j > i+1 and nums[j] == nums[j-1]: # 去重
+                    continue
+                left, right = j+1, n-1
+                while left < right:
+                    s = nums[i] + nums[j] + nums[left] + nums[right]
+                    if s == target:
+                        result.append([nums[i], nums[j], nums[left], nums[right]])
+                        while left < right and nums[left] == nums[left+1]:
+                            left += 1
+                        while left < right and nums[right] == nums[right-1]:
+                            right -= 1
+                        left += 1
+                        right -= 1
+                    elif s < target:
+                        left += 1
+                    else:
+                        right -= 1
+        return result
+      ```
+      

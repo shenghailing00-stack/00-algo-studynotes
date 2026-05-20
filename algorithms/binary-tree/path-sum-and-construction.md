@@ -1,0 +1,9 @@
+﻿# 二叉树递归：路径判断与构造
+- [513找左下角的值](https://leetcode.cn/problems/find-bottom-left-tree-value/)
+  - ![513-1](../../assets/picture/513-1.jpg)
+  - ![513-2](../../assets/picture/513-2.jpg)
+- [112路径总和](https://leetcode.cn/problems/path-sum/)
+  - ![112-1](../../assets/picture/112-1.jpg)
+  - ![112-2](../../assets/picture/112-2.jpg)
+- [106从中序与后序构造二叉树](https://leetcode.cn/problems/construct-binary-tree-from-inorder-and-postorder-traversal/)
+  - ![106](../../assets/picture/106.jpg)

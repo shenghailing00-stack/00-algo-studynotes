@@ -1,0 +1,9 @@
+﻿# 二叉树属性：翻转、对称与深度
+- [226.翻转二叉树](https://leetcode.cn/problems/invert-binary-tree/)
+  - ![226](../../assets/picture/226.jpg)
+- [101.对称二叉树](https://leetcode.cn/problems/symmetric-tree/)
+  - ![101](../../assets/picture/226.jpg)
+- [104.最大深度](https://leetcode.cn/problems/maximum-depth-of-binary-tree/)
+  - ![104](../../assets/picture/104.jpg)
+- [111.最小深度](https://leetcode.cn/problems/minimum-depth-of-binary-tree/)
+  - ![104](../../assets/picture/111.jpg)
